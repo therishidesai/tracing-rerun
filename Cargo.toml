@@ -2,6 +2,11 @@
 name = "tracing-rerun"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "A tracing layer to send logs to rerun"
+homepage = "https://github.com/therishidesai/tracing-rerun"
+repository = "https://github.com/therishidesai/tracing-rerun"
+readme = "README.md"
 
 [dependencies]
 rerun = "0.23.3"
