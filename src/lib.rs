@@ -1,6 +1,7 @@
 use rerun::{RecordingStream, TextLogLevel};
+use std::path::Path;
 use tracing::{Event, Level, Subscriber};
-use tracing_subscriber::{layer::Context, Layer};
+use tracing_subscriber::{Layer, layer::Context};
 
 fn to_rerun_log_level(tracing_level: &Level) -> TextLogLevel {
     match *tracing_level {
@@ -36,12 +37,14 @@ where
             .unwrap_or_default();
 
         // Collect fields
-        struct Visitor<'a> { buf: &'a mut String }
+        struct Visitor<'a> {
+            buf: &'a mut String,
+        }
         impl<'a> tracing::field::Visit for Visitor<'a> {
             fn record_debug(
                 &mut self,
                 _field: &tracing::field::Field,
-                value: &dyn std::fmt::Debug
+                value: &dyn std::fmt::Debug,
             ) {
                 let _ = write!(self.buf, "{:?} ", value);
             }
@@ -49,22 +52,25 @@ where
 
         let meta = event.metadata();
         let mut msg = String::new();
-        let span_prefix = if spans.is_empty() { 
-            String::new() 
-        } else { 
-            format!("{spans}: ") 
+        let span_prefix = if spans.is_empty() {
+            String::new()
+        } else {
+            format!("{spans}: ")
         };
-        let _ = write!(
-            msg,
-            "{}{}: ",
-            span_prefix,
-            meta.target()
-        );
+        if let Some(file) = meta.file()
+            && let Some(line) = meta.line()
+        {
+            if let Some(filename) = Path::new(file).file_name().and_then(|x| x.to_str()) {
+                let _ = write!(msg, "{}:{} ", filename, line);
+            }
+        }
+        let _ = write!(msg, "{}{}: ", span_prefix, meta.target());
         let mut v = Visitor { buf: &mut msg };
         event.record(&mut v);
 
         // Ship to Rerun
-        let text = rerun::archetypes::TextLog::new(msg).with_level(to_rerun_log_level(meta.level()));
+        let text =
+            rerun::archetypes::TextLog::new(msg).with_level(to_rerun_log_level(meta.level()));
         let _ = self.rec.log(self.path.as_str(), &text);
     }
 }
