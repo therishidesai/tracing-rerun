@@ -14,13 +14,21 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+          extensions = [
+            "clippy"
+            "rust-analyzer"
+            "rustfmt"
+          ];
+        };
       in
       with pkgs;
       {
         devShells.default = mkShell {
           nativeBuildInputs = [
+            nixd
             rerun
-            rust-bin.stable.latest.default
+            rustToolchain
             valgrind
           ];
         };
