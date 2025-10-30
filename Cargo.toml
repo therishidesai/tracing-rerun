@@ -1,6 +1,6 @@
 [package]
 name = "tracing-rerun"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 license = "MIT"
 description = "A tracing layer to send logs to rerun"
@@ -9,7 +9,7 @@ repository = "https://github.com/therishidesai/tracing-rerun"
 readme = "README.md"
 
 [dependencies]
-rerun = "0.25.1"
+rerun = "0.26"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.20"
 

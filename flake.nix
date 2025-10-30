@@ -29,6 +29,7 @@
             nixd
             rerun
             rustToolchain
+          ] ++ lib.optionals (pkgs.stdenv.isLinux) [
             valgrind
           ];
         };
